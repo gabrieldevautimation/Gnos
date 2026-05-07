@@ -2,19 +2,22 @@
 
 import { useState } from 'react'
 import { motion } from 'framer-motion'
+import { Button } from '@repo/ui/button'
+import { Input } from '@repo/ui/input'
+import { Textarea } from '@repo/ui/textarea'
+import { Select } from '@repo/ui/select'
+import { Badge } from '@repo/ui/badge'
 
 const ease = [0.32, 0.72, 0, 1] as const
 type State = 'idle' | 'sending' | 'success' | 'error'
 
-const services = [
+const serviceOptions = [
   { value: '',           label: 'Qual serviço você precisa?' },
   { value: 'automation', label: '⚡ Automação' },
   { value: 'marketing',  label: '📣 Marketing' },
   { value: 'software',   label: '💻 Software' },
   { value: 'all',        label: '🚀 Os três juntos' },
 ]
-
-const inputCls = 'w-full rounded-lg border border-white/[0.08] bg-zinc-950 px-3.5 py-2.5 text-sm text-zinc-100 placeholder:text-zinc-700 transition-all focus:outline-none focus:ring-1 focus:ring-violet-500/40 focus:border-violet-500/30'
 
 export function Contact() {
   const [state, setState] = useState<State>('idle')
@@ -65,7 +68,7 @@ export function Contact() {
           initial={{ opacity: 0, x: 24 }} whileInView={{ opacity: 1, x: 0 }} viewport={{ once: true }}
           transition={{ duration: 0.6, ease }}
         >
-          <div className="rounded-2xl border border-white/[0.08] bg-[#0d0d0d] p-8 inset-top-glow">
+          <div className="rounded-2xl border border-white/[0.08] bg-[#0d0d0d] p-8 shadow-[inset_0_1px_0_rgba(255,255,255,0.06)]">
             {state === 'success' ? (
               <div className="flex flex-col items-center gap-4 py-10 text-center">
                 <div className="flex h-14 w-14 items-center justify-center rounded-full border border-violet-500/20 bg-violet-500/[0.06] text-xl font-bold text-violet-400">✓</div>
@@ -77,38 +80,37 @@ export function Contact() {
                 <div className="grid gap-4 sm:grid-cols-2">
                   <div className="flex flex-col gap-1.5">
                     <label className="text-xs font-medium text-zinc-500">Nome *</label>
-                    <input name="name" value={form.name} onChange={set} placeholder="Seu nome" className={inputCls} required />
+                    <Input name="name" value={form.name} onChange={set} placeholder="Seu nome" required />
                   </div>
                   <div className="flex flex-col gap-1.5">
                     <label className="text-xs font-medium text-zinc-500">Email *</label>
-                    <input name="email" type="email" value={form.email} onChange={set} placeholder="seu@email.com" className={inputCls} required />
+                    <Input name="email" type="email" value={form.email} onChange={set} placeholder="seu@email.com" required />
                   </div>
                 </div>
                 <div className="grid gap-4 sm:grid-cols-2">
                   <div className="flex flex-col gap-1.5">
                     <label className="text-xs font-medium text-zinc-500">WhatsApp</label>
-                    <input name="phone" value={form.phone} onChange={set} placeholder="+55 11 99999-9999" className={inputCls} />
+                    <Input name="phone" value={form.phone} onChange={set} placeholder="+55 11 99999-9999" />
                   </div>
                   <div className="flex flex-col gap-1.5">
                     <label className="text-xs font-medium text-zinc-500">Serviço *</label>
-                    <select name="service" value={form.service} onChange={set} className={inputCls} required>
-                      {services.map(o => <option key={o.value} value={o.value} className="bg-zinc-950">{o.label}</option>)}
-                    </select>
+                    <Select name="service" value={form.service} onChange={set} required>
+                      {serviceOptions.map(o => <option key={o.value} value={o.value} className="bg-zinc-950">{o.label}</option>)}
+                    </Select>
                   </div>
                 </div>
                 <div className="flex flex-col gap-1.5">
                   <label className="text-xs font-medium text-zinc-500">Mensagem</label>
-                  <textarea name="message" value={form.message} onChange={set} rows={4} placeholder="Fale sobre seu negócio e o que precisa..." className={`${inputCls} resize-none`} />
+                  <Textarea name="message" value={form.message} onChange={set} rows={4} placeholder="Fale sobre seu negócio e o que precisa..." />
                 </div>
 
                 {state === 'error' && <p className="text-xs text-red-400">Algo deu errado. Tente novamente.</p>}
 
-                <button type="submit" disabled={state === 'sending'}
-                  className="inline-flex items-center justify-center gap-2 rounded-lg bg-white py-3 text-sm font-semibold text-black transition-colors hover:bg-zinc-100 disabled:opacity-50 disabled:cursor-not-allowed">
+                <Button type="submit" disabled={state === 'sending'} className="w-full">
                   {state === 'sending' ? (
                     <><span className="h-4 w-4 animate-spin rounded-full border-2 border-black/20 border-t-black" />Enviando...</>
                   ) : 'Enviar mensagem →'}
-                </button>
+                </Button>
               </form>
             )}
           </div>
