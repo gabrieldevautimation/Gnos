@@ -1,5 +1,6 @@
 'use client'
 
+import { useEffect, useRef } from 'react'
 import { motion } from 'framer-motion'
 
 const ease = [0.32, 0.72, 0, 1] as const
@@ -13,8 +14,44 @@ const lines = [
 ]
 
 export function Manifesto() {
+  const sectionRef = useRef<HTMLElement>(null)
+
+  /* ── GSAP clip-path reveal ───────────────────────────────────────────── */
+  useEffect(() => {
+    if (!sectionRef.current) return
+    let ctx: { revert: () => void } | null = null
+
+    import('gsap').then(async ({ gsap }) => {
+      const { ScrollTrigger } = await import('gsap/ScrollTrigger')
+      gsap.registerPlugin(ScrollTrigger)
+
+      ctx = gsap.context(() => {
+        gsap.fromTo('.manifesto-line',
+          {
+            clipPath: 'inset(0 100% 0 0)',
+            opacity: 0,
+          },
+          {
+            clipPath: 'inset(0 0% 0 0)',
+            opacity: 1,
+            duration: 1.1,
+            stagger: 0.25,
+            ease: 'power3.inOut',
+            scrollTrigger: {
+              trigger: sectionRef.current,
+              start: 'top 72%',
+              toggleActions: 'play none none none',
+            },
+          }
+        )
+      }, sectionRef)
+    })
+
+    return () => ctx?.revert()
+  }, [])
+
   return (
-    <section id="manifesto" className="relative border-y border-white/[0.06] bg-[#0a0a0a] py-32">
+    <section ref={sectionRef} id="manifesto" className="relative border-y border-white/[0.06] bg-[#0a0a0a] py-32">
       <div className="container max-w-3xl">
         <motion.p
           initial={{ opacity: 0 }}
@@ -28,19 +65,15 @@ export function Manifesto() {
 
         <div className="flex flex-col gap-1.5 mb-12">
           {lines.map((l, i) => (
-            <motion.p
+            <p
               key={i}
-              initial="hidden"
-              whileInView="show"
-              viewport={{ once: true }}
-              variants={fadeUp}
-              transition={{ duration: 0.6, ease, delay: i * 0.1 }}
-              className={`font-sans text-3xl font-semibold leading-tight tracking-tight sm:text-4xl md:text-5xl ${
+              className={`manifesto-line font-sans text-3xl font-semibold leading-tight tracking-tight sm:text-4xl md:text-5xl ${
                 l.accent ? 'text-zinc-100' : 'text-zinc-600'
               }`}
+              style={{ clipPath: 'inset(0 100% 0 0)', opacity: 0 }}
             >
               {l.text}
-            </motion.p>
+            </p>
           ))}
         </div>
 

@@ -48,7 +48,7 @@ function SpotlightCard({ icon, title, description, items }: (typeof services)[0]
       onMouseEnter={() => setVisible(true)}
       onMouseLeave={() => setVisible(false)}
       className={cn(
-        'group relative overflow-hidden rounded-2xl border border-white/[0.08] bg-[#0d0d0d] p-8 inset-top-glow',
+        'card-3d group relative overflow-hidden rounded-2xl border border-white/[0.08] bg-[#0d0d0d] p-8 inset-top-glow',
         'transition-all duration-300 hover:border-white/[0.13]',
       )}
     >
