@@ -1,4 +1,7 @@
 /** @type {import('next').NextConfig} */
-const nextConfig = {};
+const nextConfig = {
+  // Permite import dinâmico do GSAP sem erros de SSR
+  transpilePackages: ['gsap'],
+}
 
-export default nextConfig;
+export default nextConfig
