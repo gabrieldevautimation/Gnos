@@ -1,82 +1,61 @@
 'use client'
 
-import { useEffect, useRef } from 'react'
-import styles from './Manifesto.module.css'
+import { motion } from 'framer-motion'
 
-const text = [
-  'Na filosofia antiga, Gnose não era apenas saber.',
-  'Era um conhecimento que transformava.',
-  'A diferença entre acumular informação',
-  'e ser verdadeiramente iluminado por ela.',
+const ease = [0.32, 0.72, 0, 1] as const
+const fadeUp = { hidden: { opacity: 0, y: 20 }, show: { opacity: 1, y: 0 } }
+
+const lines = [
+  { text: 'Na filosofia antiga, Gnose não era apenas saber.', accent: true },
+  { text: 'Era um conhecimento que transformava.', accent: false },
+  { text: 'A diferença entre acumular informação', accent: false },
+  { text: 'e ser verdadeiramente iluminado por ela.', accent: true },
 ]
 
 export function Manifesto() {
-  const sectionRef = useRef<HTMLElement>(null)
-
-  useEffect(() => {
-    let ctx: import('gsap').Context | undefined
-    ;(async () => {
-      const { gsap } = await import('gsap')
-      const { ScrollTrigger } = await import('gsap/ScrollTrigger')
-      gsap.registerPlugin(ScrollTrigger)
-      if (!sectionRef.current) return
-
-      ctx = gsap.context(() => {
-        gsap.from('.manifesto-line', {
-          y: 50,
-          opacity: 0,
-          duration: 0.9,
-          stagger: 0.2,
-          ease: 'power3.out',
-          scrollTrigger: {
-            trigger: sectionRef.current,
-            start: 'top 72%',
-            toggleActions: 'play none none none',
-          },
-        })
-
-        gsap.from('.manifesto-tag', {
-          opacity: 0,
-          duration: 0.7,
-          delay: 0.2,
-          scrollTrigger: {
-            trigger: sectionRef.current,
-            start: 'top 72%',
-          },
-        })
-
-        gsap.from('.manifesto-sub', {
-          y: 30,
-          opacity: 0,
-          duration: 0.7,
-          scrollTrigger: {
-            trigger: sectionRef.current,
-            start: 'top 60%',
-          },
-        })
-      }, sectionRef)
-    })()
-    return () => ctx?.revert()
-  }, [])
-
   return (
-    <section id="manifesto" ref={sectionRef} className={`section ${styles.section}`}>
-      <div className={`container ${styles.inner}`}>
-        <span className={`manifesto-tag ${styles.tag}`}>◈ Sobre a Gnos</span>
+    <section id="manifesto" className="relative border-y border-white/[0.06] bg-[#0a0a0a] py-32">
+      <div className="container max-w-3xl">
+        <motion.p
+          initial={{ opacity: 0 }}
+          whileInView={{ opacity: 1 }}
+          viewport={{ once: true }}
+          transition={{ duration: 0.5, ease }}
+          className="mb-10 text-xs font-semibold uppercase tracking-[0.14em] text-violet-500"
+        >
+          ◈ Sobre a Gnos
+        </motion.p>
 
-        <div className={styles.textBlock}>
-          {text.map((line, i) => (
-            <p key={i} className={`manifesto-line ${styles.line} ${i === 0 || i === 3 ? styles.accent : ''}`}>
-              {line}
-            </p>
+        <div className="flex flex-col gap-1.5 mb-12">
+          {lines.map((l, i) => (
+            <motion.p
+              key={i}
+              initial="hidden"
+              whileInView="show"
+              viewport={{ once: true }}
+              variants={fadeUp}
+              transition={{ duration: 0.6, ease, delay: i * 0.1 }}
+              className={`font-sans text-3xl font-semibold leading-tight tracking-tight sm:text-4xl md:text-5xl ${
+                l.accent ? 'text-zinc-100' : 'text-zinc-600'
+              }`}
+            >
+              {l.text}
+            </motion.p>
           ))}
         </div>
 
-        <p className={`manifesto-sub ${styles.sub}`}>
+        <motion.p
+          initial="hidden"
+          whileInView="show"
+          viewport={{ once: true }}
+          variants={fadeUp}
+          transition={{ duration: 0.6, ease, delay: 0.5 }}
+          className="border-l-2 border-violet-500/40 pl-5 text-base leading-relaxed text-zinc-500 sm:text-lg"
+        >
           É esse princípio que guia tudo que construímos. Cada automação, cada
           campanha, cada linha de código. Não somos uma agência — somos parceiros
           de conhecimento.
-        </p>
+        </motion.p>
       </div>
     </section>
   )
