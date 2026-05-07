@@ -37,7 +37,7 @@ export function Contact() {
   }
 
   return (
-    <section id="contato" className="bg-black py-32">
+    <section id="contato" className="bg-black/60 backdrop-blur-sm py-32">
       <div className="container grid gap-20 lg:grid-cols-2 lg:items-center">
         {/* Left */}
         <motion.div

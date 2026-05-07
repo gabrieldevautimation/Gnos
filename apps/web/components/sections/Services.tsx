@@ -82,7 +82,7 @@ function SpotlightCard({ icon, title, description, items }: (typeof services)[0]
 
 export function Services() {
   return (
-    <section id="servicos" className="bg-black py-32">
+    <section id="servicos" className="bg-black/60 backdrop-blur-sm py-32">
       <div className="container">
         <div className="mb-16 max-w-xl">
           <motion.p

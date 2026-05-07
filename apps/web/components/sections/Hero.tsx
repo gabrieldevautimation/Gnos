@@ -156,7 +156,7 @@ export function Hero() {
   }, [])
 
   return (
-    <section ref={sectionRef} id="home" className="relative flex min-h-svh flex-col justify-center overflow-hidden bg-black">
+    <section ref={sectionRef} id="home" className="relative flex min-h-svh flex-col justify-center overflow-hidden bg-black/40 backdrop-blur-[2px]">
       {/* Canvas particles */}
       <canvas
         ref={canvasRef}

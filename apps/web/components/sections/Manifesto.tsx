@@ -51,7 +51,7 @@ export function Manifesto() {
   }, [])
 
   return (
-    <section ref={sectionRef} id="manifesto" className="relative border-y border-white/[0.06] bg-[#0a0a0a] py-32">
+    <section ref={sectionRef} id="manifesto" className="relative border-y border-white/[0.06] bg-[#0a0a0a]/70 backdrop-blur-sm py-32">
       <div className="container max-w-3xl">
         <motion.p
           initial={{ opacity: 0 }}

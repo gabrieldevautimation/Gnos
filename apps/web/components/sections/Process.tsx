@@ -13,7 +13,7 @@ const steps = [
 
 export function Process() {
   return (
-    <section id="processo" className="relative border-y border-white/[0.06] bg-[#0a0a0a] py-32">
+    <section id="processo" className="relative border-y border-white/[0.06] bg-[#0a0a0a]/70 backdrop-blur-sm py-32">
       <div className="container">
         <div className="mb-16 max-w-xl">
           <motion.p
