@@ -1,0 +1,21 @@
+# ─── CODEOWNERS ───────────────────────────────────────────────────────────────
+# Define quem precisa aprovar mudanças em cada parte do projeto.
+# Formato: padrão  @usuario-github
+
+# Default: toda mudança precisa de review
+*                          @gnos-dev
+
+# Site principal
+apps/web/                  @gnos-dev
+
+# Portal do cliente
+apps/portal/               @gnos-dev
+
+# API — revisão obrigatória
+apps/api/                  @gnos-dev
+
+# Schema do banco — revisão obrigatória (mudanças aqui têm impacto alto)
+packages/database/         @gnos-dev
+
+# CI/CD — mudanças críticas
+.github/                   @gnos-dev

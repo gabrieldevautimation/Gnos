@@ -1,0 +1,108 @@
+# ─── CI — Lint, Typecheck & Build ─────────────────────────────────────────────
+# Roda em todo PR e push para main/develop
+# Garante que nenhum código quebrado entra no repositório
+
+name: CI
+
+on:
+  push:
+    branches: [main, develop]
+  pull_request:
+    branches: [main, develop]
+
+env:
+  # Necessário para o Turbo Remote Cache (opcional, mas recomendado)
+  TURBO_TOKEN: ${{ secrets.TURBO_TOKEN }}
+  TURBO_TEAM: ${{ secrets.TURBO_TEAM }}
+
+jobs:
+  # ─── Job 1: Lint ──────────────────────────────────────────────────────────────
+  lint:
+    name: 🔍 Lint
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 2
+
+      - name: Setup pnpm
+        uses: pnpm/action-setup@v4
+        with:
+          version: 9
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          cache: pnpm
+
+      - name: Instalar dependências
+        run: pnpm install --frozen-lockfile
+
+      - name: Rodar lint
+        run: pnpm lint
+
+  # ─── Job 2: Typecheck ─────────────────────────────────────────────────────────
+  typecheck:
+    name: 🔷 Typecheck
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 2
+
+      - name: Setup pnpm
+        uses: pnpm/action-setup@v4
+        with:
+          version: 9
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          cache: pnpm
+
+      - name: Instalar dependências
+        run: pnpm install --frozen-lockfile
+
+      - name: Rodar typecheck
+        run: pnpm check-types
+
+  # ─── Job 3: Build ─────────────────────────────────────────────────────────────
+  build:
+    name: 🏗️ Build
+    runs-on: ubuntu-latest
+    needs: [lint, typecheck]
+    env:
+      # Variáveis mínimas para o build não quebrar
+      DATABASE_URL: postgresql://postgres:postgres@localhost:5432/gnos
+      DIRECT_URL: postgresql://postgres:postgres@localhost:5432/gnos
+      NEXT_PUBLIC_SANITY_PROJECT_ID: placeholder
+      NEXT_PUBLIC_SANITY_DATASET: production
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 2
+
+      - name: Setup pnpm
+        uses: pnpm/action-setup@v4
+        with:
+          version: 9
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          cache: pnpm
+
+      - name: Instalar dependências
+        run: pnpm install --frozen-lockfile
+
+      - name: Gerar Prisma Client
+        run: pnpm --filter @gnos/database db:generate
+
+      - name: Build
+        run: pnpm build

@@ -1,0 +1,104 @@
+# ─── Deploy — Vercel (web + portal) & Railway (api) ──────────────────────────
+# Roda apenas em push para main (após merge de PR)
+# web e portal vão para Vercel | api vai para Railway
+
+name: Deploy
+
+on:
+  push:
+    branches: [main]
+
+jobs:
+  # ─── Deploy Web (Vercel) ──────────────────────────────────────────────────────
+  deploy-web:
+    name: 🌐 Deploy Web → Vercel
+    runs-on: ubuntu-latest
+    environment: production
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Setup pnpm
+        uses: pnpm/action-setup@v4
+        with:
+          version: 9
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          cache: pnpm
+
+      - name: Instalar dependências
+        run: pnpm install --frozen-lockfile
+
+      - name: Instalar Vercel CLI
+        run: pnpm add -g vercel
+
+      - name: Pull variáveis de ambiente (Vercel)
+        run: vercel pull --yes --environment=production --token=${{ secrets.VERCEL_TOKEN }}
+        working-directory: apps/web
+
+      - name: Build (Vercel)
+        run: vercel build --prod --token=${{ secrets.VERCEL_TOKEN }}
+        working-directory: apps/web
+
+      - name: Deploy (Vercel)
+        run: vercel deploy --prebuilt --prod --token=${{ secrets.VERCEL_TOKEN }}
+        working-directory: apps/web
+
+  # ─── Deploy Portal (Vercel) ───────────────────────────────────────────────────
+  deploy-portal:
+    name: 🔐 Deploy Portal → Vercel
+    runs-on: ubuntu-latest
+    environment: production
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Setup pnpm
+        uses: pnpm/action-setup@v4
+        with:
+          version: 9
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          cache: pnpm
+
+      - name: Instalar dependências
+        run: pnpm install --frozen-lockfile
+
+      - name: Instalar Vercel CLI
+        run: pnpm add -g vercel
+
+      - name: Pull variáveis de ambiente (Vercel)
+        run: vercel pull --yes --environment=production --token=${{ secrets.VERCEL_TOKEN }}
+        working-directory: apps/portal
+
+      - name: Build (Vercel)
+        run: vercel build --prod --token=${{ secrets.VERCEL_TOKEN }}
+        working-directory: apps/portal
+
+      - name: Deploy (Vercel)
+        run: vercel deploy --prebuilt --prod --token=${{ secrets.VERCEL_TOKEN }}
+        working-directory: apps/portal
+
+  # ─── Deploy API (Railway) ─────────────────────────────────────────────────────
+  deploy-api:
+    name: ⚡ Deploy API → Railway
+    runs-on: ubuntu-latest
+    environment: production
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Instalar Railway CLI
+        run: npm install -g @railway/cli
+
+      - name: Deploy API
+        run: railway up --service=gnos-api --detach
+        working-directory: apps/api
+        env:
+          RAILWAY_TOKEN: ${{ secrets.RAILWAY_TOKEN }}

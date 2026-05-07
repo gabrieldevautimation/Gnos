@@ -1,0 +1,47 @@
+# ─── PR Validation — Conventional Commits ─────────────────────────────────────
+# Valida que o título do PR segue Conventional Commits
+# Exemplo válido: "feat(api): add lead creation endpoint"
+# Tipos: feat | fix | chore | docs | style | refactor | test | perf | ci | build
+
+name: PR Validation
+
+on:
+  pull_request:
+    types: [opened, edited, synchronize, reopened]
+
+jobs:
+  validate-pr-title:
+    name: ✅ Validar título do PR
+    runs-on: ubuntu-latest
+    steps:
+      - name: Validar Conventional Commit
+        uses: amannn/action-semantic-pull-request@v5
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        with:
+          types: |
+            feat
+            fix
+            chore
+            docs
+            style
+            refactor
+            test
+            perf
+            ci
+            build
+          scopes: |
+            web
+            portal
+            api
+            database
+            ui
+            config
+            n8n
+            deps
+          requireScope: false
+          subjectPattern: ^(?![A-Z]).+$
+          subjectPatternError: |
+            O assunto do PR '${subject}' não segue o padrão.
+            Deve começar com letra minúscula.
+            Exemplo: "feat(api): adicionar endpoint de leads"
