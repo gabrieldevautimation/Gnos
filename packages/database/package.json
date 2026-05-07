@@ -14,8 +14,12 @@
     "db:migrate:prod": "prisma migrate deploy",
     "db:studio": "prisma studio",
     "db:seed": "tsx prisma/seed.ts",
+    "db:reset": "prisma migrate reset --force",
     "check-types": "tsc --noEmit",
     "clean": "rimraf dist"
+  },
+  "prisma": {
+    "seed": "tsx prisma/seed.ts"
   },
   "dependencies": {
     "@prisma/client": "^6.8.2"
@@ -23,6 +27,7 @@
   "devDependencies": {
     "@gnos/config": "workspace:*",
     "@types/node": "^22.15.14",
+    "dotenv-cli": "^8.0.0",
     "prisma": "^6.8.2",
     "rimraf": "^6.0.1",
     "tsx": "^4.19.4",

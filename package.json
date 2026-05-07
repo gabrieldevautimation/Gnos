@@ -11,9 +11,15 @@
     "format": "prettier --write \"**/*.{ts,tsx,md}\"",
     "check-types": "turbo run check-types",
     "clean": "turbo run clean && rimraf node_modules",
-    "db:generate": "turbo run db:generate --filter=database",
-    "db:migrate": "turbo run db:migrate --filter=database",
-    "db:studio": "turbo run db:studio --filter=database"
+    "db:generate": "pnpm --filter @gnos/database db:generate",
+    "db:migrate": "pnpm --filter @gnos/database db:migrate",
+    "db:migrate:prod": "pnpm --filter @gnos/database db:migrate:prod",
+    "db:seed": "pnpm --filter @gnos/database db:seed",
+    "db:studio": "pnpm --filter @gnos/database db:studio",
+    "db:reset": "pnpm --filter @gnos/database db:reset",
+    "setup:db": "node scripts/setup-db.mjs",
+    "docker:up": "docker compose up -d",
+    "docker:down": "docker compose down"
   },
   "devDependencies": {
     "prettier": "^3.7.4",
