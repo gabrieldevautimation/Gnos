@@ -1,159 +1,127 @@
-# Turborepo starter
+# Gnos Platform
 
-This Turborepo starter is maintained by the Turborepo core team.
+> **Automação. Marketing. Software.**  
+> Conhecimento que move negócios.
 
-## Using this example
+Monorepo da plataforma Gnos — construído com Turborepo, TypeScript, Next.js, Fastify e Supabase.
 
-Run the following command:
+---
 
-```sh
-npx create-turbo@latest
+## 🏗️ Estrutura
+
+```
+gnos/
+├── apps/
+│   ├── web/          # Site principal (Next.js) — vitrine + showcase
+│   ├── portal/       # Portal do cliente (Next.js) — SaaS
+│   └── api/          # Backend (Fastify) — API + EventBus
+├── packages/
+│   ├── ui/           # Componentes compartilhados
+│   ├── database/     # Prisma schema + client
+│   └── config/       # Configs: ESLint, TypeScript, Tailwind
+└── tools/
+    └── n8n/          # Workflows de automação (JSON exports)
 ```
 
-## What's inside?
+---
 
-This Turborepo includes the following packages/apps:
+## 🚀 Início Rápido
 
-### Apps and Packages
+### Pré-requisitos
+- Node.js 18+
+- pnpm 9+
+- Docker Desktop
 
-- `docs`: a [Next.js](https://nextjs.org/) app
-- `web`: another [Next.js](https://nextjs.org/) app
-- `@repo/ui`: a stub React component library shared by both `web` and `docs` applications
-- `@repo/eslint-config`: `eslint` configurations (includes `eslint-config-next` and `eslint-config-prettier`)
-- `@repo/typescript-config`: `tsconfig.json`s used throughout the monorepo
+### Setup
 
-Each package/app is 100% [TypeScript](https://www.typescriptlang.org/).
+```bash
+# 1. Clone o repositório
+git clone https://github.com/gnos/platform.git
+cd platform
 
-### Utilities
+# 2. Copie as variáveis de ambiente
+cp .env.example .env
+# Edite o .env com seus valores
 
-This Turborepo has some additional tools already setup for you:
+# 3. Instale as dependências
+pnpm install
 
-- [TypeScript](https://www.typescriptlang.org/) for static type checking
-- [ESLint](https://eslint.org/) for code linting
-- [Prettier](https://prettier.io) for code formatting
+# 4. Suba o ambiente local
+docker compose up -d
 
-### Build
+# 5. Rode as migrations do banco
+pnpm db:migrate
 
-To build all apps and packages, run the following command:
-
-With [global `turbo`](https://turborepo.dev/docs/getting-started/installation#global-installation) installed (recommended):
-
-```sh
-cd my-turborepo
-turbo build
+# 6. Inicie todos os apps em dev
+pnpm dev
 ```
 
-Without global `turbo`, use your package manager:
+### Comandos individuais
 
-```sh
-cd my-turborepo
-npx turbo build
-yarn dlx turbo build
-pnpm exec turbo build
+```bash
+pnpm dev:web      # Só o site (porta 3000)
+pnpm dev:portal   # Só o portal (porta 3002)
+pnpm dev:api      # Só a API (porta 3001)
+
+pnpm db:studio    # Abre o Prisma Studio
+pnpm db:migrate   # Roda migrations
+pnpm check-types  # Verifica TypeScript em todo monorepo
+pnpm lint         # Lint em todo monorepo
 ```
 
-You can build a specific package by using a [filter](https://turborepo.dev/docs/crafting-your-repository/running-tasks#using-filters):
+---
 
-With [global `turbo`](https://turborepo.dev/docs/getting-started/installation#global-installation) installed:
+## 🐳 Serviços Docker (dev local)
 
-```sh
-turbo build --filter=docs
+| Serviço    | URL                   | Credenciais          |
+|------------|-----------------------|----------------------|
+| PostgreSQL | `localhost:5432`      | `postgres/postgres`  |
+| N8N        | `http://localhost:5678` | `admin/gnos-secret` |
+| Redis      | `localhost:6379`      | —                    |
+| API        | `http://localhost:3001` | —                   |
+
+---
+
+## 🧠 Arquitetura de Eventos
+
+A API usa um `EventBus` com transport abstrato. Todos os eventos de domínio são tipados em `apps/api/src/events/domain-events.ts`.
+
+**Transport atual:** N8N Webhook  
+**Próximo:** Redis BullMQ (Fase 2)  
+**Futuro:** Kafka (quando a escala exigir)
+
+```typescript
+import { eventBus } from './events/event-bus.js'
+
+await eventBus.emit({
+  type: 'lead.created',
+  payload: { name: 'João', email: 'joao@empresa.com', service: 'AUTOMATION' }
+})
 ```
 
-Without global `turbo`:
+---
 
-```sh
-npx turbo build --filter=docs
-yarn exec turbo build --filter=docs
-pnpm exec turbo build --filter=docs
-```
+## 📋 Bounded Contexts
 
-### Develop
+| Context | Domínio | Tabelas |
+|---|---|---|
+| **Marketing/Leads** | Site, captação | `leads` |
+| **Clientes/Portal** | Portal SaaS | `clients`, `projects`, `deliveries` |
+| **Automações** | N8N templates | `automation_templates`, `automation_executions` |
 
-To develop all apps and packages, run the following command:
+> **Regra:** Nunca fazer JOIN entre bounded contexts. Referencie por ID e comunique via API.
 
-With [global `turbo`](https://turborepo.dev/docs/getting-started/installation#global-installation) installed (recommended):
+---
 
-```sh
-cd my-turborepo
-turbo dev
-```
+## 🛠️ Stack
 
-Without global `turbo`, use your package manager:
-
-```sh
-cd my-turborepo
-npx turbo dev
-yarn exec turbo dev
-pnpm exec turbo dev
-```
-
-You can develop a specific package by using a [filter](https://turborepo.dev/docs/crafting-your-repository/running-tasks#using-filters):
-
-With [global `turbo`](https://turborepo.dev/docs/getting-started/installation#global-installation) installed:
-
-```sh
-turbo dev --filter=web
-```
-
-Without global `turbo`:
-
-```sh
-npx turbo dev --filter=web
-yarn exec turbo dev --filter=web
-pnpm exec turbo dev --filter=web
-```
-
-### Remote Caching
-
-> [!TIP]
-> Vercel Remote Cache is free for all plans. Get started today at [vercel.com](https://vercel.com/signup?utm_source=remote-cache-sdk&utm_campaign=free_remote_cache).
-
-Turborepo can use a technique known as [Remote Caching](https://turborepo.dev/docs/core-concepts/remote-caching) to share cache artifacts across machines, enabling you to share build caches with your team and CI/CD pipelines.
-
-By default, Turborepo will cache locally. To enable Remote Caching you will need an account with Vercel. If you don't have an account you can [create one](https://vercel.com/signup?utm_source=turborepo-examples), then enter the following commands:
-
-With [global `turbo`](https://turborepo.dev/docs/getting-started/installation#global-installation) installed (recommended):
-
-```sh
-cd my-turborepo
-turbo login
-```
-
-Without global `turbo`, use your package manager:
-
-```sh
-cd my-turborepo
-npx turbo login
-yarn exec turbo login
-pnpm exec turbo login
-```
-
-This will authenticate the Turborepo CLI with your [Vercel account](https://vercel.com/docs/concepts/personal-accounts/overview).
-
-Next, you can link your Turborepo to your Remote Cache by running the following command from the root of your Turborepo:
-
-With [global `turbo`](https://turborepo.dev/docs/getting-started/installation#global-installation) installed:
-
-```sh
-turbo link
-```
-
-Without global `turbo`:
-
-```sh
-npx turbo link
-yarn exec turbo link
-pnpm exec turbo link
-```
-
-## Useful Links
-
-Learn more about the power of Turborepo:
-
-- [Tasks](https://turborepo.dev/docs/crafting-your-repository/running-tasks)
-- [Caching](https://turborepo.dev/docs/crafting-your-repository/caching)
-- [Remote Caching](https://turborepo.dev/docs/core-concepts/remote-caching)
-- [Filtering](https://turborepo.dev/docs/crafting-your-repository/running-tasks#using-filters)
-- [Configuration Options](https://turborepo.dev/docs/reference/configuration)
-- [CLI Usage](https://turborepo.dev/docs/reference/command-line-reference)
+- **Monorepo:** Turborepo + pnpm workspaces
+- **Frontend:** Next.js 14 (App Router) + TypeScript
+- **Animações:** GSAP + ScrollTrigger + Three.js
+- **Backend:** Fastify + TypeScript
+- **Banco:** Supabase (PostgreSQL) + Prisma
+- **Eventos:** EventBus → N8N → Redis → Kafka
+- **Automações:** N8N (self-hosted)
+- **Email:** Resend
+- **CMS:** Sanity.io
+- **Deploy:** Vercel (web/portal) + Railway (api)

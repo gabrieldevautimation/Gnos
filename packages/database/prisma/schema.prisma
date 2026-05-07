@@ -1,0 +1,155 @@
+// ─── Gnos — Prisma Schema ─────────────────────────────────────────────────────
+// Bounded contexts separados por comentário de seção.
+// REGRA: nunca fazer JOIN entre bounded contexts — use IDs e chame via API.
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider  = "postgresql"
+  url       = env("DATABASE_URL")
+  directUrl = env("DIRECT_URL")
+}
+
+// ═══════════════════════════════════════════════════════════
+// BOUNDED CONTEXT: MARKETING / LEADS
+// Domínio: site principal, formulário de contato, captação
+// ═══════════════════════════════════════════════════════════
+
+enum LeadStatus {
+  NEW
+  CONTACTED
+  QUALIFIED
+  CONVERTED
+  LOST
+}
+
+enum ServiceType {
+  AUTOMATION
+  MARKETING
+  SOFTWARE
+  FULL_STACK // os 3 pilares
+}
+
+model Lead {
+  id          String      @id @default(cuid())
+  name        String
+  email       String      @unique
+  phone       String?
+  company     String?
+  service     ServiceType
+  message     String?
+  status      LeadStatus  @default(NEW)
+  source      String?     // "site", "instagram", "indicação"
+  convertedAt DateTime?
+  createdAt   DateTime    @default(now())
+  updatedAt   DateTime    @updatedAt
+
+  @@map("leads")
+}
+
+// ═══════════════════════════════════════════════════════════
+// BOUNDED CONTEXT: CLIENTES / PORTAL
+// Domínio: portal do cliente, autenticação, projetos
+// ═══════════════════════════════════════════════════════════
+
+enum ProjectStatus {
+  PLANNING
+  IN_PROGRESS
+  REVIEW
+  COMPLETED
+  PAUSED
+}
+
+model Client {
+  id          String    @id @default(cuid())
+  supabaseId  String    @unique // ID do Supabase Auth
+  name        String
+  email       String    @unique
+  company     String?
+  phone       String?
+  avatarUrl   String?
+  onboardedAt DateTime?
+  createdAt   DateTime  @default(now())
+  updatedAt   DateTime  @updatedAt
+
+  projects    Project[]
+
+  @@map("clients")
+}
+
+model Project {
+  id          String        @id @default(cuid())
+  clientId    String
+  name        String
+  description String?
+  type        ServiceType
+  status      ProjectStatus @default(PLANNING)
+  startedAt   DateTime?
+  completedAt DateTime?
+  createdAt   DateTime      @default(now())
+  updatedAt   DateTime      @updatedAt
+
+  client      Client        @relation(fields: [clientId], references: [id])
+  deliveries  Delivery[]
+
+  @@map("projects")
+}
+
+model Delivery {
+  id          String   @id @default(cuid())
+  projectId   String
+  title       String
+  description String?
+  completed   Boolean  @default(false)
+  dueDate     DateTime?
+  completedAt DateTime?
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+
+  project     Project  @relation(fields: [projectId], references: [id])
+
+  @@map("deliveries")
+}
+
+// ═══════════════════════════════════════════════════════════
+// BOUNDED CONTEXT: AUTOMAÇÕES
+// Domínio: templates N8N, execuções, logs
+// ═══════════════════════════════════════════════════════════
+
+enum AutomationStatus {
+  ACTIVE
+  INACTIVE
+  ERROR
+}
+
+model AutomationTemplate {
+  id          String   @id @default(cuid())
+  name        String
+  description String?
+  category    String   // "whatsapp", "crm", "report", "social"
+  n8nWorkflow Json     // JSON do workflow N8N
+  isPublic    Boolean  @default(false)
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+
+  executions  AutomationExecution[]
+
+  @@map("automation_templates")
+}
+
+model AutomationExecution {
+  id           String            @id @default(cuid())
+  templateId   String
+  clientId     String            // ID do cliente (referência cross-context via ID)
+  status       AutomationStatus  @default(ACTIVE)
+  triggeredAt  DateTime          @default(now())
+  completedAt  DateTime?
+  errorMessage String?
+  metadata     Json?
+
+  template     AutomationTemplate @relation(fields: [templateId], references: [id])
+
+  @@map("automation_executions")
+}
